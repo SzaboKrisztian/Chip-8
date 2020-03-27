@@ -1,0 +1,15 @@
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0em;
+    color: darkgrey;
+    background-color: #222222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#display {
+    margin: 0em;
+}
