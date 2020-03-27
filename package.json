@@ -1,0 +1,19 @@
+{
+  "name": "chip8",
+  "version": "1.0.0",
+  "description": "Chip8 Emulator",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "keywords": [
+    "Chip8",
+    "Emulator"
+  ],
+  "author": "Chris Szabo",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
