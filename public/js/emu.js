@@ -85,6 +85,7 @@ function initRomSelect(data) {
             xhr.onreadystatechange = () => {
                 if (xhr.readyState === xhr.DONE) {
                     if (xhr.status === 200) {
+                        document.getElementById("rom").blur();
                         const data = new Uint8Array(xhr.response);
                         chip8 = new Chip8(data);
 

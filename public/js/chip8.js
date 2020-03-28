@@ -135,7 +135,7 @@ export function Chip8(rom) {
                 // 1nnn: JP addr - Jump to location nnn
                 this.pc = (opcode & 0x0fff);
                 if (this.logging) {
-                    console.log("Execution jumping to addr", this.pc.toString(16));
+                    console.log("Jumping to addr", this.pc.toString(16));
                 }
                 break;
             case 0x2000:
@@ -230,9 +230,9 @@ export function Chip8(rom) {
                         // 8xy4: ADD Vx, Vy; VF carry - Set Vx = Vx + Vy; Set VF = 1 if Vx + Vy > 255, else 0
                         result = this.v[vx] + this.v[vy];
                         if (this.logging) {
-                            console.log(`Set V${vx.toString(16)} (${this.v[vx]}) += V${vy.toString(16)} (${this.v[vy]}) => (${result & 0xff}), Vf = ${result & 0x100}`);
+                            console.log(`Set V${vx.toString(16)} (${this.v[vx]}) += V${vy.toString(16)} (${this.v[vy]}) => (${result & 0xff}), Vf = ${result & 0x100 >> 8}`);
                         }
-                        this.v[0xf] = (result & 0x100);
+                        this.v[0xf] = (result & 0x100) >> 8;
                         this.v[vx] = (result & 0xff);
                         break;
                     case 0x0005:
@@ -262,13 +262,14 @@ export function Chip8(rom) {
                         this.v[vx] = (result & 0xff); // TODO: figure out if this is correct, because of two's complement notation
                         break;
                     case 0x000e:
-                        // 8xye: SHL Vx; VF bit lost - Set Vx <<= 1; Set VF = Vx AND 0x100
+                        // 8xyE: SHL Vx; VF bit lost - Set Vx <<= 1; Set VF = Vx AND 0x100
                         if (this.logging) {
-                            console.log(`Set V${vx.toString(16)} (${this.v[vx]}) <<= 1 (${(this.v[vx] << 1) & 0xff}), Vf = ${this.v[vx] & 0x100}`);
+                            console.log(`Set V${vx.toString(16)} (${this.v[vx]}) <<= 1 (${(this.v[vx] << 1) & 0xff}), Vf = ${(this.v[vx] & 0x100) >> 8}`);
                         }
                         this.v[vx] <<= 1;
-                        this.v[0xf] = (this.v[vx] & 0x100);
+                        this.v[0xf] = (this.v[vx] & 0x100) >> 8;
                         this.v[vx] &= 0xff;
+                        break;
                     default:
                         console.log(`Unknown opcode ${opcode.toString(16)}`);
                         break;
@@ -321,26 +322,30 @@ export function Chip8(rom) {
 
                 let row = 0;
                 while (row < height && spriteY + row < 32) {
-                    const data = this.memory[this.index + row];
+                    let data = this.memory[this.index + row];
                     if (this.logging) {
                         console.log(data.toString(2));
                     }
 
                     const limit = Math.min(8, 64 - spriteX);
                     let col = 0;
-                    while (col < limit) {
+                    while (col < limit && data > 0) {
                         const maskOffset = 7 - col;
                         const mask = 1 << maskOffset;
                         const pixel = (data & mask) >> maskOffset;
+                        data ^= mask;
                         
                         const bufferOffset = (spriteY + row) * 64 + (spriteX + col);
-                        if (pixel === 0 && this.displayBuffer[bufferOffset] === 1) {
+                        if (pixel === 1 && this.displayBuffer[bufferOffset] === 1) {
                             this.v[0xf] = 1;
                         }
                         this.displayBuffer[bufferOffset] ^= pixel;
                         col++;
                     }
                     row++;
+                }
+                if (this.logging) {
+                    console.log(`VF = ${this.v[0xf]}`);
                 }
                 this.shouldDraw = true;
                 break;
@@ -416,11 +421,11 @@ export function Chip8(rom) {
                     case 0x001e:
                         // Fx1E: ADD I, Vx - Set I = I + Vx; Set VF 1 if carry
                         result = this.index + this.v[vx];
-                        this.v[0xf] = (result & 0x100);
+                        this.v[0xf] = (result & 0x1000) >> 12;
                         if (this.logging) {
-                            console.log(`Set I (${this.index.toString(16)}) += V${vx.toString(16)} (${this.v[vx].toString(16)}), VF = ${result & 0x100}`);
+                            console.log(`Set I (${this.index.toString(16)}) += V${vx.toString(16)} (${this.v[vx].toString(16)}), VF = ${(result & 0x100) >> 12}`);
                         }
-                        this.index &= 0x0fff;
+                        this.index = (result & 0x0fff);
                         break;
                     case 0x0029:
                         // Fx29: LD F, Vx - Set I = addr of sprite for digit in Vx
