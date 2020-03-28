@@ -4,11 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chip8 Emulator</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
 </head>
 <body>
-    <canvas id="display" width="640" height="320"></canvas>
+    <canvas id="display" width="1024" height="512"></canvas>
     <select id="rom" tabindex="-1"><option value="">Select ROM</option></select>
-    <script src="js/emu.js" type="module"></script>
+    <button id="help" tabindex="-1">Help</button>
+    <div id="help-box">
+        <p id="text">
+            The Chip 8 has 16 keys, labelled 0..9, A..F. They are layed out as shown here. This emulator maps them to the left side of the keyboard.
+        </p>
+        <table class="input">
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>C</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>5</td>
+                <td>6</td>
+                <td>D</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>8</td>
+                <td>9</td>
+                <td>E</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>0</td>
+                <td>B</td>
+                <td>F</td>
+            </tr>
+        </table>
+        =>
+        <table class="input">
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td>Q</td>
+                <td>W</td>
+                <td>E</td>
+                <td>R</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>S</td>
+                <td>D</td>
+                <td>F</td>
+            </tr>
+            <tr>
+                <td>Z</td>
+                <td>X</td>
+                <td>C</td>
+                <td>V</td>
+            </tr>
+        </table>
+    </div>
+    <script src="/js/emu.js" type="module"></script>
 </body>
 </html>

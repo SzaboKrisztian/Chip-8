@@ -1,9 +1,10 @@
 import { Chip8 } from "./chip8.js";
 
-const minPixelSize = 10;
-const dispCols = 64;
-const dispRows = 32;
+const numCols = 64;
+const numRows = 32;
 let chip8 = null;
+let beep = null;
+let loop = null;
 const pixels = [];
 let canvas, display;
 
@@ -28,6 +29,17 @@ const keyCodes = {
 
 window.onload = () => {
 
+    const help = document.getElementById("help-box");
+    document.getElementById("help").addEventListener("click", (event) => {
+        if (help.style.display !== "flex") {
+            help.style.display = "flex";
+        } else {
+            help.style.display = "none";
+        }
+    });
+
+    beep = new Audio("/res/beep.mp3");
+
     let xhr = new XMLHttpRequest();
     xhr.open("GET", "/roms");
     xhr.send(null);
@@ -51,19 +63,18 @@ window.onload = () => {
     canvas = document.getElementById("display");
     display = canvas.getContext("2d");
 
-    const margin = Math.floor(document.body.clientWidth / 10);
-    const scaleFactor = Math.floor((document.body.clientWidth - 2 * margin) / (dispCols * minPixelSize));
-    const pixelSize = minPixelSize * scaleFactor;
+    const pixelSize = Math.floor(canvas.width / numCols);
 
-    canvas.width = canvas.width * scaleFactor;
-    canvas.height = canvas.height * scaleFactor;
+    canvas.width = numCols * pixelSize;
+    canvas.height = numRows * pixelSize;
+    console.log(canvas.width, canvas.height, pixelSize);
 
     display.fillStyle = '#000000';
     display.fillRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i < dispCols * dispRows; i++) {
-        let col = i % dispCols;
-        let row = Math.floor(i / dispCols);
+    for (let i = 0; i < numCols * numRows; i++) {
+        let col = i % numCols;
+        let row = Math.floor(i / numCols);
         pixels.push([col * pixelSize, row * pixelSize, pixelSize, pixelSize]);
     }
 }
@@ -85,6 +96,9 @@ function initRomSelect(data) {
             xhr.onreadystatechange = () => {
                 if (xhr.readyState === xhr.DONE) {
                     if (xhr.status === 200) {
+                        if (loop !== null) {
+                            toggleGameLoop();
+                        }
                         document.getElementById("rom").blur();
                         const data = new Uint8Array(xhr.response);
                         chip8 = new Chip8(data);
@@ -101,7 +115,7 @@ function initRomSelect(data) {
                             }
                         });
 
-                        setInterval(gameLoop, 2);
+                        toggleGameLoop();
                     } else {
                         console.log("Error retrieving rom. Status: ", xhr.status, xhr.statusText);
                     }
@@ -109,6 +123,15 @@ function initRomSelect(data) {
             }
         }
     });
+}
+
+function toggleGameLoop() {
+    if (loop === null) {
+        loop = setInterval(gameLoop, 2);
+    } else {
+        clearInterval(loop);
+        loop = null;
+    }
 }
 
 function gameLoop() {
@@ -129,7 +152,8 @@ function gameLoop() {
     }
 
     if (chip8.shouldBeep) {
-        // TODO: Beep here, somehow :)
+        beep.currentTime = 0;
+        beep.play();
         chip8.shouldBeep = false;
     }
 }

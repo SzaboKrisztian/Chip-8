@@ -1,7 +1,7 @@
 body, html {
-    width: 100%;
-    height: 100%;
-    margin: 0em;
+    min-width: 100%;
+    min-height: 100%;
+    margin: 0;
     color: darkgrey;
     background-color: #222222;
     display: flex;
@@ -11,5 +11,33 @@ body, html {
 }
 
 #display {
-    margin: 0em;
+    width: 80vw;
+    height: 40vw;
+}
+
+#rom {
+    margin: 2em;
+}
+
+#help-box {
+    display: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-items: center;
+}
+
+#text {
+    width: 15em;
+}
+
+table.input, tr, td {
+    border: 1px solid darkgray;
+    margin: 1em;
+}
+
+td {
+    width: 2em;
+    height: 2em;
+    text-align: center;
 }
