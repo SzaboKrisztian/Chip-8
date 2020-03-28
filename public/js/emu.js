@@ -4,7 +4,8 @@ const minPixelSize = 10;
 const dispCols = 64;
 const dispRows = 32;
 let chip8 = null;
-let canvas, display, pixels;
+const pixels = [];
+let canvas, display;
 
 const keyCodes = {
     49: 0x1,
@@ -52,14 +53,7 @@ window.onload = () => {
 
     const margin = Math.floor(document.body.clientWidth / 10);
     const scaleFactor = Math.floor((document.body.clientWidth - 2 * margin) / (dispCols * minPixelSize));
-    const pixelSize = dispRows * scaleFactor;
-
-    pixels = [];
-    for (let i = 0; i < dispCols * dispRows; i++) {
-        let col = i % dispRows;
-        let row = Math.floor(i / dispCols);
-        pixels.push([col * pixelSize, row * pixelSize, pixelSize, pixelSize]);
-    }
+    const pixelSize = minPixelSize * scaleFactor;
 
     canvas.width = canvas.width * scaleFactor;
     canvas.height = canvas.height * scaleFactor;
@@ -67,6 +61,11 @@ window.onload = () => {
     display.fillStyle = '#000000';
     display.fillRect(0, 0, canvas.width, canvas.height);
 
+    for (let i = 0; i < dispCols * dispRows; i++) {
+        let col = i % dispCols;
+        let row = Math.floor(i / dispCols);
+        pixels.push([col * pixelSize, row * pixelSize, pixelSize, pixelSize]);
+    }
 }
 
 function initRomSelect(data) {
@@ -87,23 +86,21 @@ function initRomSelect(data) {
                 if (xhr.readyState === xhr.DONE) {
                     if (xhr.status === 200) {
                         const data = new Uint8Array(xhr.response);
-                        console.log(data.length, data);
                         chip8 = new Chip8(data);
 
                         document.body.addEventListener("keydown", (event) => {
                             if (event.keyCode in keyCodes) {
-                                chip8.keyPressed(event.keyCode);
+                                chip8.keyPressed(keyCodes[event.keyCode]);
                             }
                         });
 
                         document.body.addEventListener("keyup", (event) => {
                             if (event.keyCode in keyCodes) {
-                                chip8.keyReleased(event.keyCode);
+                                chip8.keyReleased(keyCodes[event.keyCode]);
                             }
                         });
 
                         setInterval(gameLoop, 2);
-                        setInterval(chip8.tickTimers(), 16);
                     } else {
                         console.log("Error retrieving rom. Status: ", xhr.status, xhr.statusText);
                     }
